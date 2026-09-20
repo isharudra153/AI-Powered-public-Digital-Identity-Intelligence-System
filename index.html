@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DigitalTrace AI - Demo</title>
+  <style>
+    body { background:#0a0f1a; color:#fff; font-family:Arial; text-align:center; padding:20px; }
+    input { padding:8px; width:240px; }
+    button { padding:8px 14px; cursor:pointer; }
+    #photo { width:110px; height:110px; border-radius:50%; object-fit:cover;
+             border:3px solid #2dd4bf; display:none; margin:15px auto 5px; }
+    #message { color:#f87171; min-height:22px; }
+  </style>
+</head>
+<body>
+  <h2>DigitalTrace AI</h2>
+  <input id="nameInput" placeholder="Try: Rahul Sharma">
+  <button id="searchBtn">Search</button>
+  <p id="message"></p>
+  <img id="photo" alt="profile photo">
+  <h3 id="resultName"></h3>
+  <svg id="graph" width="700" height="350"></svg>
+
+<script>
+  const svg = document.getElementById("graph");
+
+  // Creates one SVG shape (line, circle or text)
+  function makeShape(tag, attrs, text) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const key in attrs) el.setAttribute(key, attrs[key]);
+    if (text) el.textContent = text;
+    return el;
+  }
+
+  // Draws the graph: person in the middle, platforms around them
+  function drawGraph(name, platforms) {
+    svg.innerHTML = "";                       // clear the old graph
+    const cx = 350, cy = 175;
+    platforms.forEach((p, i) => {
+      const angle = (2 * Math.PI * i) / platforms.length - Math.PI / 2;
+      const x = cx + 230 * Math.cos(angle);   // spread evenly in a circle
+      const y = cy + 120 * Math.sin(angle);
+      svg.appendChild(makeShape("line", {x1:cx, y1:cy, x2:x, y2:y, stroke:"#475569", "stroke-width":2}));
+      svg.appendChild(makeShape("circle", {cx:x, cy:y, r:42, fill:"#0d1b2a", stroke:"#2dd4bf", "stroke-width":3}));
+      svg.appendChild(makeShape("text", {x:x, y:y+5, fill:"#fff", "font-size":13, "text-anchor":"middle"}, p));
+    });
+    svg.appendChild(makeShape("circle", {cx:cx, cy:cy, r:55, fill:"#0d1b2a", stroke:"#2dd4bf", "stroke-width":3}));
+    svg.appendChild(makeShape("text", {x:cx, y:cy+5, fill:"#fff", "font-size":13, "text-anchor":"middle"}, name));
+  }
+
+  // Shows the name, photo and graph for one profile
+  function showResult(data) {
+    document.getElementById("resultName").textContent = data.name;
+    const photo = document.getElementById("photo");
+    photo.onerror = () => { photo.style.display = "none"; };  // no file? hide it
+    photo.src = data.photo;
+    photo.style.display = "block";
+    drawGraph(data.name, data.platforms);
+  }
+
+  // Clears everything when there is no match
+  function clearResult() {
+    document.getElementById("resultName").textContent = "";
+    document.getElementById("photo").style.display = "none";
+    svg.innerHTML = "";
+  }
+
+  // Runs when you click Search
+  async function search() {
+    const typed = document.getElementById("nameInput").value.trim();
+    const message = document.getElementById("message");
+    if (typed === "") return;
+    message.textContent = "";
+    try {
+      const res = await fetch("/api/lookup?name=" + encodeURIComponent(typed));
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail);
+      }
+      showResult(await res.json());
+    } catch (e) {
+      message.textContent = e.message;
+      clearResult();
+    }
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", search);
+  document.getElementById("nameInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") search();          // Enter key also searches
+  });
+</script>
+</body>
+</html>
