@@ -27,6 +27,44 @@ This project brings that fragmented information into one investigation dashboard
 
 The primary users are authorized cybersecurity investigators and security teams. The platform may also support approved use cases involving fraud review, trust and safety, lawful research, event verification, and personal digital-footprint auditing.
 
+## Architecture
+        ┌──────────────────┐
+        │  Investigator    │
+        │ Name / Username  │
+        └────────┬─────────┘
+                 ↓
+        ┌──────────────────┐
+        │ Identity Matching│
+        │   + AI Scoring   │
+        └────────┬─────────┘
+                 ↓
+        ┌──────────────────┐
+        │ Profile Discovery│
+        │ LinkedIn / GitHub│
+        │ YouTube / Instagram│
+        └────────┬─────────┘
+                 ↓
+        ┌──────────────────┐
+        │ Cross-Platform   │
+        │   Correlation    │
+        └────────┬─────────┘
+                 ↓
+        ┌──────────────────┐
+        │ Entity Resolution│
+        │ + False Match    │
+        │    Detection     │
+        └────────┬─────────┘
+                 ↓
+        ┌──────────────────┐
+        │ Intelligence +   │
+        │ Evidence Graph   │
+        └────────┬─────────┘
+                 ↓
+        ┌──────────────────┐
+        │ DigitalTrace AI  │
+        │    Dashboard     │
+        └──────────────────┘
+
 ## How it works
 
 1. The investigator creates an authorized case.
